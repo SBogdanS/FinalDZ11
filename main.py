@@ -35,13 +35,18 @@ class Name(Field):
 class Birthday(Field):
     @Field.value.setter
     def value(self, value: str):
-        self.__value = datetime.strptime(value, "%Y.%m.%d").date()
+        try:
+            self.__value = datetime.strptime(value, "%Y.%m.%d")
+            return True
+        except ValueError:
+            return False
 
 
 class Record:
-    def __init__(self, name):
+    def __init__(self, name, birthday):
         self.name = Name(name)
         self.phones = []
+        self.birthday = Birthday(birthday)
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
@@ -51,13 +56,6 @@ class Record:
         # phone.validate(phone_number)
         if phone not in self.phones:
             self.phones.append(phone)
-
-    def is_valid_birthday(value):
-        try:
-            datetime.strptime(value, "%Y.%m.%d")
-            return True
-        except ValueError:
-            return False
 
     def find_phone(self, value):
         for phone in self.phones:
@@ -105,7 +103,7 @@ class AddressBook(UserDict):
         counter = 0
         result = ""
         for item, record in self.data.items():
-            result += f"{item}: {record}"
+            result += f"{item}: {record}\n"
             counter += 1
             if counter >= item_number:
                 yield result
